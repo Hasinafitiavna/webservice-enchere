@@ -91,5 +91,9 @@ public class Controller {
     public ArrayList<EnchereAction> gethistorique(@PathVariable("idclient") int idclient) throws Exception{
         return f.getAllEnchereAction(idclient);
     }
+    @GetMapping("insertIntoRechargementCompte/{idclient}/{montant}")
+    public void insertRechargement(@PathVariable("idclient") int idclient,@PathVariable("montant") double montant) throws Exception{
+        f.insertIntoRechargementCompte(idclient,montant);
+    }
 
 }

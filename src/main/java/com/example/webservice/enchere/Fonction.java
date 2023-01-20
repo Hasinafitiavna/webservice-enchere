@@ -419,4 +419,12 @@ public class Fonction {
         connection.close();
         return res;
     }
+
+    public static void insertIntoRechargementCompte(int idclient,double montant) throws Exception{
+        String sql = "insert into rechargementcompte(idclient,montant) values ";
+        Connection connection = connexion.getConn();
+        Statement stmt = connection.createStatement();
+        stmt.executeUpdate(sql+ "("+idclient+","+montant+")");
+        connection.close();
+    }
 }
