@@ -95,5 +95,9 @@ public class Controller {
     public void insertRechargement(@PathVariable("idclient") int idclient,@PathVariable("montant") double montant) throws Exception{
         f.insertIntoRechargementCompte(idclient,montant);
     }
+    @GetMapping("lienimage/{id}")
+    public String lienimage(@PathVariable("id") int id) throws Exception{
+        return f.getUrlImage(id);
+    }
 
 }

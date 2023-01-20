@@ -427,4 +427,15 @@ public class Fonction {
         stmt.executeUpdate(sql+ "("+idclient+","+montant+")");
         connection.close();
     }
+
+    public static String getUrlImage(int id) throws Exception{
+        String sql = "select image from enchere join produit on enchere.idproduit=produit.id where enchere.id="+id;
+        Connection connection = connexion.getConn();
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        String res = "";
+        while(rs.next()) res = rs.getString("image");
+        connection.close();
+        return res;
+    }
 }
