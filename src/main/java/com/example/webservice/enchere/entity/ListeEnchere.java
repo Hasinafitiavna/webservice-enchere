@@ -2,11 +2,20 @@ package com.example.webservice.enchere.entity;
 
 public class ListeEnchere {
     int id;
+    String image;
     String nomproduit;
     String nomclient;
     String dateDebut;
     String dateFin;
     int montantBase;
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
 
     public int getId() {
         return id;

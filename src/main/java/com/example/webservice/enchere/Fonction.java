@@ -32,6 +32,7 @@ public class Fonction {
         while(rs.next()){
             ListeEnchere listeEnchere = new ListeEnchere();
             listeEnchere.setId(rs.getInt("id"));
+            listeEnchere.setImage(rs.getString("image"));
             listeEnchere.setNomproduit(rs.getString("nomproduit"));
             listeEnchere.setNomclient(rs.getString("nomclient"));
             listeEnchere.setDateDebut(rs.getString("datedebut"));

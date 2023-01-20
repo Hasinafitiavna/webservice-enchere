@@ -111,8 +111,7 @@ select * from venchereclient where idenchere=1;
 
 
 create or replace view listeenchere as
-select enchere.id,produit.nom as nomproduit,client.nom as nomclient,datedebut,datefin,montantdebase from enchere join client on enchere.idclientdetenteur = client.id join produit  on enchere.idproduit = produit.id;
-
+select enchere.id,image,produit.nom as nomproduit,client.nom as nomclient,datedebut,datefin,montantdebase from enchere join client on enchere.idclientdetenteur = client.id join produit  on enchere.idproduit = produit.id;
 
 create table usedMoney(
                           id serial,
