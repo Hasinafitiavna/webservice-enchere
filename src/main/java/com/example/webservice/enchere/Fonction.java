@@ -514,7 +514,7 @@ public class Fonction {
 
     public static ArrayList<EnchereAction> getAllEnchereAction(int idclient)throws Exception{
         ArrayList<EnchereAction> res = new ArrayList<>();
-        String sql = "select * from actionencherir where idclient="+idclient;
+        String sql = "select * from historique where idclient="+idclient;
         Connection connection = connexion.getConn();
         Statement stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(sql);
