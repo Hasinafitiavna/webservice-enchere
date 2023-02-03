@@ -88,7 +88,8 @@ create table actionencherir(
 
 update enchere set datedebut='2023-02-03 06:00:00';
 update enchere set datefin='2023-02-04 21:00:00';
-
+create view historique as
+select actionencherir.id,actionencherir.idenchere,actionencherir.idclient,montant,dateaction,image,nom from actionencherir join enchere e on e.id = actionencherir.idenchere join produit p on e.idproduit = p.id;
 create table lienenchereaction(
                                   idenchere int,
                                   idaction int,

@@ -524,6 +524,8 @@ public class Fonction {
             enchereAction.setIdclient(rs.getInt("idclient"));
             enchereAction.setMontant(rs.getDouble("montant"));
             enchereAction.setDateaction(rs.getTimestamp("dateaction"));
+            enchereAction.setImage(rs.getString("image"));
+            enchereAction.setNom(rs.getString("nom"));
             res.add(enchereAction);
         }
         connection.close();

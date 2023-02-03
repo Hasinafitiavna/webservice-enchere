@@ -7,6 +7,24 @@ public class EnchereAction {
     int idclient;
     double montant;
     Timestamp dateaction;
+    String image;
+    String nom;
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
 
     public EnchereAction(){}
 
@@ -42,10 +60,12 @@ public class EnchereAction {
         this.dateaction = dateaction;
     }
 
-    public EnchereAction(int idenchere, int idclient, double montant, Timestamp dateaction) {
+    public EnchereAction(int idenchere, int idclient, double montant, Timestamp dateaction, String image, String nom) {
         this.idenchere = idenchere;
         this.idclient = idclient;
         this.montant = montant;
         this.dateaction = dateaction;
+        this.image = image;
+        this.nom = nom;
     }
 }
