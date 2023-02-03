@@ -1,32 +1,35 @@
 package com.example.webservice.enchere.entity;
 
+import java.sql.Timestamp;
+
 public class Enchere {
     int id;
     int idproduit;
     int idclientdetenteur;
-    String dateDebut;
-    String dateFin;
-    int montantBase;
+    Timestamp datedebut;
+    Timestamp datefin;
+    double montantdebase;
+    boolean state;
 
-    public Enchere(int id, int idproduit, int idclientdetenteur, String dateDebut, String dateFin, int montantBase) {
+    public Enchere(int id, int idproduit, int idclientdetenteur, Timestamp datedebut, Timestamp datefin, double montantdebase, boolean state) {
         this.id = id;
         this.idproduit = idproduit;
         this.idclientdetenteur = idclientdetenteur;
-        this.dateDebut = dateDebut;
-        this.dateFin = dateFin;
-        this.montantBase = montantBase;
+        this.datedebut = datedebut;
+        this.datefin = datefin;
+        this.montantdebase = montantdebase;
+        this.state = state;
     }
 
-    public Enchere(int id, int idproduit, String dateDebut, String dateFin, int montantBase) {
+    public Enchere(int id, int idproduit, Timestamp datedebut, Timestamp datefin, double montantdebase) {
         this.id = id;
         this.idproduit = idproduit;
-        this.dateDebut = dateDebut;
-        this.dateFin = dateFin;
-        this.montantBase = montantBase;
+        this.datedebut = datedebut;
+        this.datefin = datefin;
+        this.montantdebase = montantdebase;
     }
 
-    public Enchere() {
-    }
+    public Enchere(){}
 
     public int getId() {
         return id;
@@ -52,27 +55,35 @@ public class Enchere {
         this.idclientdetenteur = idclientdetenteur;
     }
 
-    public String getDateDebut() {
-        return dateDebut;
+    public Timestamp getDatedebut() {
+        return datedebut;
     }
 
-    public void setDateDebut(String dateDebut) {
-        this.dateDebut = dateDebut;
+    public void setDatedebut(Timestamp datedebut) {
+        this.datedebut = datedebut;
     }
 
-    public String getDateFin() {
-        return dateFin;
+    public Timestamp getDatefin() {
+        return datefin;
     }
 
-    public void setDateFin(String dateFin) {
-        this.dateFin = dateFin;
+    public void setDatefin(Timestamp datefin) {
+        this.datefin = datefin;
     }
 
-    public int getMontantBase() {
-        return montantBase;
+    public double getMontantdebase() {
+        return montantdebase;
     }
 
-    public void setMontantBase(int montantBase) {
-        this.montantBase = montantBase;
+    public void setMontantdebase(double montantdebase) {
+        this.montantdebase = montantdebase;
+    }
+
+    public boolean isState() {
+        return state;
+    }
+
+    public void setState(boolean state) {
+        this.state = state;
     }
 }

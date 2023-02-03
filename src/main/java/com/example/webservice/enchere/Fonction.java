@@ -4,6 +4,7 @@ import com.example.webservice.enchere.entity.*;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Fonction {
     static Connexion connexion = new Connexion();
@@ -89,9 +90,9 @@ public class Fonction {
             listeEnchere.setId(rs.getInt("id"));
             listeEnchere.setIdproduit(rs.getInt("idproduit"));
             listeEnchere.setIdclientdetenteur(rs.getInt("idclientdetenteur"));
-            listeEnchere.setDateDebut(rs.getString("datedebut"));
-            listeEnchere.setDateFin(rs.getString("datefin"));
-            listeEnchere.setMontantBase(rs.getInt("montantdebase"));
+            listeEnchere.setDatedebut(rs.getTimestamp("datedebut"));
+            listeEnchere.setDatefin(rs.getTimestamp("datefin"));
+            listeEnchere.setMontantdebase(rs.getInt("montantdebase"));
         }
         connection.close();
         return listeEnchere;
@@ -130,10 +131,21 @@ public class Fonction {
     }
     public void insertClient(Client client) throws Exception{
         String sql = "insert into client(nom,pass) values ('"+client.getNom()+"','"+client.getPass()+"')";
+        String sql1 = "insert into cartebancaire(idclient,montant) values ("+getLastClient()+",20000)";
         Connection connection = connexion.getConn();
         Statement stmt = connection.createStatement();
         stmt.executeUpdate(sql);
+        stmt.executeUpdate(sql1);
         connection.close();
+    }
+    public int getLastClient() throws Exception{
+        String sql = "select id from client order by id desc limit 1";
+        Connection connection = connexion.getConn();
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        int res = 0;
+        while(rs.next()) res = rs.getInt("id");
+        return res+1;
     }
     public void insertProduit(Produit produit) throws Exception{
         String sql = "insert into produit(nom,image) values ('"+produit.getNom()+"','"+produit.getLienimage()+"')";
@@ -160,13 +172,28 @@ public class Fonction {
         return res;
     }
     public static void updateEnchere(Enchere enchere) throws Exception {
-        String sql = "update enchere set idproduit="+enchere.getIdproduit()+", datedebut='"+enchere.getDateDebut()+"',datefin='"+enchere.getDateFin()+"',montantdebase="+enchere.getMontantBase()+" where id="+enchere.getId();
+        String sql = "update enchere set idproduit="+enchere.getIdproduit()+", datedebut='"+enchere.getDatedebut()+"',datefin='"+enchere.getDatefin()+"',montantdebase="+enchere.getMontantdebase()+" where id="+enchere.getId();
         Connection connection = connexion.getConn();
         Statement stmt = connection.createStatement();
         stmt.executeUpdate(sql);
         connection.close();
     }
-
+    public ArrayList<Produit> getAllProduit() throws Exception{
+        String sql = "select * from produit";
+        Connection connection = connexion.getConn();
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        ArrayList<Produit> res = new ArrayList<>();
+        while(rs.next()){
+            Produit produit = new Produit();
+            produit.setId(rs.getInt("id"));
+            produit.setNom(rs.getString("nom"));
+            produit.setLienimage(rs.getString("image"));
+            res.add(produit);
+        }
+        connection.close();
+        return res;
+    }
     public static double getMontantClient(int idclient) throws Exception{
         String sql = "select montant from cartebancaire where idclient="+idclient;
         Connection connection = connexion.getConn();
@@ -275,6 +302,20 @@ public class Fonction {
         return res;
     }
 
+    public static boolean debuteEnchere(int idproduit, int idclient, Timestamp datedebut, Timestamp datefin, double montantdebase) throws Exception{
+        boolean res = false;
+        Connection connection = connexion.getConn();
+        Statement stmt = connection.createStatement();
+        String sql = "insert into enchere(idproduit,idclientdetenteur,datedebut,datefin,montantdebase) values ("+idproduit+","+idclient+",'"+datedebut+"','"+datefin+"',"+montantdebase+")";
+        if(datefin.after(datedebut)){
+            res = true;
+            System.out.println(sql);
+            stmt.executeUpdate(sql);
+        }
+        connection.close();
+        return res;
+    }
+
     public static double getMontantdeBase(int idenchere) throws Exception{
         String sql = "select montantdebase from enchere where id="+idenchere;
         Connection connection = connexion.getConn();
@@ -362,7 +403,7 @@ public class Fonction {
         return enchereAction;
     }
     public static double getMargeBeneficiaire() throws Exception{
-        String sql = "select pourcentage from margebeneficiaire";
+        String sql = "select pourcentage from margebeneficiare";
         Connection connection = connexion.getConn();
         Statement stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(sql);
@@ -370,33 +411,101 @@ public class Fonction {
         while(rs.next()) res = rs.getDouble("pourcentage");
         return res;
     }
-    public static boolean encherir(int idenchere, int idclient, double montant, Timestamp dateaction) throws Exception{
-        boolean res = false;
+
+    public static Timestamp getLastDateActionMise(int idenchere) throws Exception{
+        String sql = "select dateaction from actionencherir where idenchere="+idenchere+" order by dateaction asc limit 1";
+        Connection connection = connexion.getConn();
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        Timestamp timestamp = null;
+        while(rs.next()) timestamp = rs.getTimestamp("dateaction");
+        connection.close();
+        return timestamp;
+    }
+
+    public static UsefulEntity encherir(int idenchere, int idclient, double montant, Timestamp dateaction) throws Exception{
+        UsefulEntity res = new UsefulEntity();
+        res.setState(false);
         Connection connection = connexion.getConn();
         double lastemise = getMontantLastMise(idenchere);
+        System.out.println("laste mise="+lastemise);
         double debutenchere = getMontantdeBase(idenchere);
+        System.out.println("debuteenchere="+debutenchere);
         Statement stmt = connection.createStatement();
-        if((getIdClientDetenteurEnchere(idenchere)!=idclient)&&(montant>lastemise||montant>debutenchere)){
-            if(checkEnchereIfAlreadyFinished(idenchere,dateaction)){
-                String sql = "insert into actionencherir(idenchere,idclient,montant,dateaction) values";
-                String sql2 = "insert into usedmoney(idclient,montant,idenchere) values ";
-                double argentenCours = getUsedMoney(idclient);
-                double montantdebase = getMontantClient(idclient);
-                double montantrestant = montantdebase-argentenCours;
-                if(montant<montantrestant){
-                    stmt.executeUpdate(sql2+"("+idclient+","+montant+","+idenchere+")");
-                    stmt.executeUpdate(sql+"("+idenchere+","+idclient+","+montant+",'"+dateaction+"')");
-                    res = true;
+        if(getLastDateActionMise(idenchere)!=null){
+            System.out.println("ato am farany ambany 1");
+            if((getIdClientDetenteurEnchere(idenchere)!=idclient)&&((montant>lastemise)&&(montant>=debutenchere))&&(dateaction.after(getLastDateActionMise(idenchere)))){
+                if(checkEnchereIfAlreadyFinished(idenchere,dateaction)){
+                    String sql = "insert into actionencherir(idenchere,idclient,montant,dateaction) values ";
+                    String sql2 = "insert into usedmoney(idclient,montant,idenchere) values ";
+                    double argentenCours = getUsedMoney(idclient);
+                    double montantdebase = getMontantClient(idclient);
+                    double montantrestant = montantdebase-argentenCours;
+                    if(montant<montantrestant){
+                        stmt.executeUpdate(sql2+"("+idclient+","+montant+","+idenchere+")");
+                        stmt.executeUpdate(sql+"("+idenchere+","+idclient+","+montant+",'"+dateaction+"')");
+                        res.setState(true);
+                        res.setMessage("Vous avez encheri!");
+                        return res;
+                    }
+                }
+                else{
+                    res.setMessage("Enchere Deja Terminee");
+                    String sql = "insert into archive(idenchere,idclientgagnat,montant,beneficeantsika) values ";
+                    EnchereAction lastAction = getLastMise(idenchere);
+                    double beneficeazo = (lastAction.getMontant()*getMargeBeneficiaire())/100;
+                    double reste = getMontantClient(lastAction.getIdclient())-lastAction.getMontant();
+                    stmt.executeUpdate(sql+" ("+idenchere+","+lastAction.getIdclient()+","+lastAction.getMontant()+","+beneficeazo+")");
+                    stmt.executeUpdate("update cartebancaire set montant="+reste+" where idclient="+lastAction.getIdclient());
+                    stmt.executeUpdate("delete from usedmoney where idenchere="+idenchere);
+                    stmt.executeUpdate("update enchere set state='true' where id="+idenchere);
+                    connection.close();
+                    return res;
                 }
             }
-            else{
-                String sql = "insert into archive(idenchere,idclientgagnat,montant,beneficeantsika) values ";
-                EnchereAction lastAction = getLastMise(idenchere);
-                double beneficeazo = (lastAction.getMontant()*getMargeBeneficiaire())/100;
-                double reste = getMontantClient(lastAction.getIdclient())-lastAction.getMontant();
-                stmt.executeUpdate(sql+" ("+idenchere+","+lastAction.getIdclient()+","+lastAction.getMontant()+","+beneficeazo+")");
-                stmt.executeUpdate("update cartebancaire set montant="+reste);
-                stmt.executeUpdate("delete from usedmoney where idenchere="+idenchere);
+            if(!res.getState()&&!Objects.equals(res.getMessage(), "")){
+                res.setMessage("Vous ne Pouvez pas Encherir, soit vous etes le detenteur de l'enchere, soit vous n'avez pas assez d'argent");
+            }
+        }
+        else {
+            System.out.println("ato am farany ambany 2");
+            System.out.println("tompony"+getIdClientDetenteurEnchere(idenchere));
+            System.out.println("ilay miencherir"+idclient);
+            System.out.println("laste mise="+lastemise);
+            System.out.println("mise="+montant);
+            System.out.println("montant de base="+debutenchere);
+            if((getIdClientDetenteurEnchere(idenchere)!=idclient)&&((montant>lastemise)&&(montant>=debutenchere))){
+                System.out.println("ambany 2 condition mety");
+                if(checkEnchereIfAlreadyFinished(idenchere,dateaction)){
+                    String sql = "insert into actionencherir(idenchere,idclient,montant,dateaction) values ";
+                    String sql2 = "insert into usedmoney(idclient,montant,idenchere) values ";
+                    double argentenCours = getUsedMoney(idclient);
+                    double montantdebase = getMontantClient(idclient);
+                    double montantrestant = montantdebase-argentenCours;
+                    if(montant<montantrestant){
+                        stmt.executeUpdate(sql2+"("+idclient+","+montant+","+idenchere+")");
+                        stmt.executeUpdate(sql+"("+idenchere+","+idclient+","+montant+",'"+dateaction+"')");
+                        res.setState(true);
+                        res.setMessage("Vous avez encheri!");
+                        return res;
+                    }
+                }
+                else{
+                    res.setMessage("Enchere Deja Terminee");
+                    String sql = "insert into archive(idenchere,idclientgagnat,montant,beneficeantsika) values ";
+                    EnchereAction lastAction = getLastMise(idenchere);
+                    double beneficeazo = (lastAction.getMontant()*getMargeBeneficiaire())/100;
+                    double reste = getMontantClient(lastAction.getIdclient())-lastAction.getMontant();
+                    stmt.executeUpdate(sql+" ("+idenchere+","+lastAction.getIdclient()+","+lastAction.getMontant()+","+beneficeazo+")");
+                    stmt.executeUpdate("update cartebancaire set montant="+reste);
+                    stmt.executeUpdate("delete from usedmoney where idenchere="+idenchere);
+                    stmt.executeUpdate("update enchere set state='true' where id="+idenchere);
+                    connection.close();
+                    return res;
+                }
+            }
+            if(!res.getState()){
+                res.setMessage("Vous ne Pouvez pas Encherir, soit vous etes le detenteur de l'enchere, soit vous n'avez pas assez d'argent");
             }
         }
         connection.close();
@@ -429,6 +538,27 @@ public class Fonction {
         connection.close();
     }
 
+    public static ArrayList<Enchere> getAllEnchereByIdClientDetenteur(int idclient)throws Exception{
+        ArrayList<Enchere> res = new ArrayList<>();
+        String sql = "select * from enchere where idclientdetenteur="+idclient;
+        Connection connection = connexion.getConn();
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        while (rs.next()){
+            Enchere enchere = new Enchere();
+            enchere.setId(rs.getInt("id"));
+            enchere.setIdproduit(rs.getInt("idproduit"));
+            enchere.setIdclientdetenteur(rs.getInt("idclientdetenteur"));
+            enchere.setDatedebut(rs.getTimestamp("datedebut"));
+            enchere.setDatefin(rs.getTimestamp("datefin"));
+            enchere.setMontantdebase(rs.getDouble("montantdebase"));
+            enchere.setState(rs.getBoolean("state"));
+            res.add(enchere);
+        }
+        connection.close();
+        return res;
+    }
+
     public static String getUrlImage(int id) throws Exception{
         String sql = "select image from enchere join produit on enchere.idproduit=produit.id where enchere.id="+id;
         Connection connection = connexion.getConn();
@@ -438,5 +568,17 @@ public class Fonction {
         while(rs.next()) res = rs.getString("image");
         connection.close();
         return res;
+    }
+    public static UsefulEntity loginV(String nom, String pass) throws Exception {
+        UsefulEntity usefulEntity = new UsefulEntity();
+        boolean res = false;
+        ArrayList<Client> all = getAllClient();
+        for (int i = 0; i < all.size(); i++) {
+            if ((nom.equals(all.get(i).getNom())) && (pass.equals(all.get(i).getPass()))) {
+                usefulEntity.setIdclient(all.get(i).getId());
+                usefulEntity.setState(true);
+            }
+        }
+        return usefulEntity;
     }
 }

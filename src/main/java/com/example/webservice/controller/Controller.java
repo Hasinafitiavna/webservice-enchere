@@ -49,18 +49,26 @@ public class Controller {
         return f.getEncherebyId(id);
     }
 
-    @GetMapping("insertclient/{client}")
-    public void insertclient(@PathVariable("client") Client client) throws Exception{
+    @GetMapping("insertclient/{nom}/{pass}")
+    public void insertclient(@PathVariable("nom") String nom,@PathVariable("pass") String pass) throws Exception{
+        Client client=new Client();
+        client.setNom(nom);
+        client.setPass(pass);
+        f.insertClient(client);
+    }
+    @GetMapping("inscription/{nom}/{mdp}")
+    public void inscription(@PathVariable("nom") String nom,@PathVariable("mdp") String mdp) throws Exception{
+        Client client= new Client(nom,mdp);
         f.insertClient(client);
     }
 
-    @GetMapping("insertproduit/{produit}")
-    public void insertclient(@PathVariable("produit") Produit produit) throws Exception{
+    @PostMapping("insertproduit")
+    public void insertproduit(@RequestBody Produit produit) throws Exception{
+
         f.insertProduit(produit);
     }
-
     @GetMapping("updateEnchere/{id}/{idproduit}/{datedebut}/{datefin}/{montant}")
-    public void updateEnchere(@PathVariable("id") int id,@PathVariable("idproduit") int idproduit,@PathVariable("datedebut")String datedebut,@PathVariable("datefin")String datefin,@PathVariable("montant")int montant) throws Exception{
+    public void updateEnchere(@PathVariable("id") int id,@PathVariable("idproduit") int idproduit,@PathVariable("datedebut")Timestamp datedebut,@PathVariable("datefin")Timestamp datefin,@PathVariable("montant")int montant) throws Exception{
 //        String dd=datedebut.replace("_",":");
 //        String df=datedebut.replace("_",":");
         Enchere enchere=new Enchere(id,idproduit,datedebut,datefin,montant);
@@ -75,9 +83,10 @@ public class Controller {
     public void rechargercompte(@PathVariable("id") int id,@PathVariable("idclient") int idclient, @PathVariable("montant") double montant) throws Exception{
         f.validerRechargementcompte(id,idclient,montant);
     }
+
     @GetMapping("encherir/{idenchere}/{idclient}/{montant}/{dateaction}")
-    public void encherir(@PathVariable("idenchere") int idenchere, @PathVariable("idclient") int idclient, @PathVariable("montant") double montant, @PathVariable("dateaction") Timestamp dateaction) throws Exception{
-        f.encherir(idenchere,idclient,montant,dateaction);
+    public UsefulEntity encherir(@PathVariable("idenchere") int idenchere, @PathVariable("idclient") int idclient, @PathVariable("montant") double montant, @PathVariable("dateaction")Timestamp dateaction) throws Exception{
+        return f.encherir(idenchere,idclient,montant,dateaction);
     }
     @GetMapping("getStat")
     public Statistique getStat() throws Exception{
@@ -98,6 +107,24 @@ public class Controller {
     @GetMapping("lienimage/{id}")
     public String lienimage(@PathVariable("id") int id) throws Exception{
         return f.getUrlImage(id);
+    }
+    @GetMapping("getallproduits")
+    public ArrayList<Produit> getproduits() throws Exception{
+        return f.getAllProduit();
+    }
+    @GetMapping("loginV/{nom}/{pass}")
+    public UsefulEntity loginV(@PathVariable("nom") String nom, @PathVariable("pass") String pass) throws Exception{
+        return f.loginV(nom,pass);
+    }
+
+    @GetMapping("debuterEnchere/{idproduit}/{idclient}/{datedebut}/{datefin}/{montant}")
+    public boolean debuterEnchere(@PathVariable("idproduit") int idproduit,@PathVariable("idclient") int idclient,@PathVariable("datedebut") Timestamp datedebut,@PathVariable("datefin") Timestamp datefin,@PathVariable("montant") double montant) throws Exception{
+        return f.debuteEnchere(idproduit,idclient,datedebut,datefin,montant);
+    }
+
+    @GetMapping("getallenchereClientDetenteur/{idclient}")
+    public ArrayList<Enchere> getallenchereClient(@PathVariable("idclient") int idclient) throws Exception{
+        return f.getAllEnchereByIdClientDetenteur(idclient);
     }
 
 }

@@ -65,6 +65,7 @@ create table enchere(
                         datedebut timestamp,
                         datefin timestamp,
                         montantdebase real,
+                        state boolean default false,
                         primary key(id),
                         foreign key(idproduit) references produit(id),
                         foreign key(idclientdetenteur) references client(id)
@@ -85,10 +86,8 @@ create table actionencherir(
                                foreign key(idenchere) references enchere(id)
 );
 
-insert into actionencherir(idclient,idenchere,montant,dateaction) values (2,1,25000,'2011-03-10 21:35:15');
-insert into actionencherir(idclient,idenchere,montant,dateaction) values (3,1,35000,'2011-03-10 22:35:15');
-insert into actionencherir(idclient,idenchere,montant,dateaction) values (2,1,45000,'2011-03-10 23:35:15');
-insert into actionencherir(idclient,idenchere,montant,dateaction) values (2,2,50000,'2011-03-10 23:45:15');
+update enchere set datedebut='2023-02-03 06:00:00';
+update enchere set datefin='2023-02-04 21:00:00';
 
 create table lienenchereaction(
                                   idenchere int,
@@ -97,18 +96,11 @@ create table lienenchereaction(
                                   foreign key(idaction) references actionencherir(id)
 );
 
-insert into lienenchereaction(idenchere,idaction) values (1,1);
-insert into lienenchereaction(idenchere,idaction) values (1,2);
-insert into lienenchereaction(idenchere,idaction) values (1,3);
-
 drop view venchereclient;
 
 create or replace view venchereclient as
 select l.idenchere idenchere,a.idclient,a.montant,a.dateaction from lienenchereaction l join actionencherir a on l.idaction = a.id
                                                                                         join client c on a.idclient = c.id order by dateaction asc;
-
-select * from venchereclient where idenchere=1;
-
 
 create or replace view listeenchere as
 select enchere.id,image,produit.nom as nomproduit,client.nom as nomclient,datedebut,datefin,montantdebase from enchere join client on enchere.idclientdetenteur = client.id join produit  on enchere.idproduit = produit.id;
@@ -123,15 +115,6 @@ create table usedMoney(
                           foreign key(idenchere) references enchere(id)
 );
 
-insert into usedMoney(idclient,idenchere,montant) values (1,1,1000);
-insert into usedMoney(idclient,idenchere,montant) values (1,1,2000);
-insert into usedMoney(idclient,idenchere,montant) values (1,1,3000);
-insert into usedMoney(idclient,idenchere,montant) values (1,2,4000);
-insert into usedMoney(idclient,idenchere,montant) values (1,2,5000);
-insert into usedMoney(idclient,idenchere,montant) values (1,2,6000);
-
-select * from usedmoney where idclient=1 and idenchere=1 order by montant desc limit 1;
-
 create table rechargementcompte(
                                    id serial,
                                    idclient int,
@@ -140,10 +123,6 @@ create table rechargementcompte(
                                    primary key(id),
                                    foreign key(idclient) references client(id)
 );
-insert into rechargementcompte ( idclient, montant) values (1,2000);
-insert into rechargementcompte ( idclient, montant) values (2,2000);
-select montant from cartebancaire where idclient=1;
-
 
 create table margebeneficiare(
                                  id serial,
@@ -163,11 +142,4 @@ create table archive(
                         foreign key(idclientgagnat) references client(id)
 );
 
-insert into archive(idenchere,idclientgagnat,montant,beneficeantsika) values (1,2,10000,2000);
-insert into archive(idenchere,idclientgagnat,montant,beneficeantsika) values (2,2,20000,4000);
-insert into archive(idenchere,idclientgagnat,montant,beneficeantsika) values (3,3,30000,1000);
-
-
-select montant from cartebancaire where idclient=1;
-
-select * from actionencherir where idenchere=1 order by dateaction desc limit 1;
+update cartebancaire set montant=100000;
