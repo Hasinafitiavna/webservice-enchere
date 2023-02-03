@@ -27,7 +27,7 @@ insert into admin(nom,pass) values ('james','j');
 create table produit(
                         id serial,
                         nom varchar(40),
-                        image varchar(40),
+                        image text,
                         primary key(id)
 );
 
