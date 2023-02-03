@@ -127,4 +127,11 @@ public class Controller {
         return f.getAllEnchereByIdClientDetenteur(idclient);
     }
 
+
+    @GetMapping("getmontantclient/{idclient}")
+    public double getMontant(@PathVariable("idclient") int idclient) throws Exception{
+        return f.getMontantClient(idclient);
+    }
+
+
 }
